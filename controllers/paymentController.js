@@ -1,4 +1,4 @@
-const stripe = require('stripe')('sk_test_51PiscID9LY3tfPKrspaiTJpv8UOg7HNbIgu2KCbljYZfsebJHfSqPMT88im01KTsyRUx80SbxSywOBUpZXIfMm5h0034JuNLIW');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Reservation = require('../models/Reservation');
 const Vehicle = require('../models/Vehicle');
 
