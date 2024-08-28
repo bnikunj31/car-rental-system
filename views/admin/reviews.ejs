@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Reviews</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 1250px;
+        }
+        .centered {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Car Rental Admin</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/users">Users</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/vehicles">Vehicles</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/reservations">Reservations</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/admin/reviews">Reviews</a>
+                </li>
+                <li class="nav-item ms-auto">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <div class="centered mb-4">
+            <h1>Review Management</h1>
+        </div>
+
+        <!-- Review Table -->
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>User</th>
+                        <th>Vehicle</th>
+                        <th>Rating</th>
+                        <th>Comment</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% reviews.forEach(review => { %>
+                    <tr>
+                        <td>
+                            <% if (review.user) { %>
+                                <%= review.user.name %> (<%= review.user.email %>)
+                            <% } else { %>
+                                <em>User Deleted</em>
+                            <% } %>
+                        </td>
+                        <td>
+                            <% if (review.vehicle) { %>
+                                <%= review.vehicle.make %> <%= review.vehicle.model %> - <%= review.vehicle.year %>
+                            <% } else { %>
+                                <em>Vehicle Deleted</em>
+                            <% } %>
+                        </td>
+                        <td><%= review.rating %></td>
+                        <td><%= review.comment %></td>
+                        <td>
+                            <form action="/admin/delete-review/<%= review._id %>" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+                
+            </table>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

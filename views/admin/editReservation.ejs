@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Reservation</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 600px;
+        }
+        .mt-5 {
+            margin-top: 3rem !important;
+        }
+        .form-label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Edit Reservation</h1>
+        <form action="/admin/edit-reservation/<%= reservation._id %>" method="POST">
+            <div class="mb-3">
+                <label for="startDate" class="form-label">Start Date</label>
+                <input type="date" class="form-control" id="startDate" name="startDate" value="<%= reservation.startDate.toISOString().split('T')[0] %>" required>
+            </div>
+            <div class="mb-3">
+                <label for="endDate" class="form-label">End Date</label>
+                <input type="date" class="form-control" id="endDate" name="endDate" value="<%= reservation.endDate.toISOString().split('T')[0] %>" required>
+            </div>
+            
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Update Reservation</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Client-side Validation Script -->
+    <script>
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+
+        // Ensure the end date is not before the start date
+        endDateInput.addEventListener('change', function() {
+            if (new Date(endDateInput.value) < new Date(startDateInput.value)) {
+                endDateInput.setCustomValidity('End date cannot be earlier than the start date.');
+            } else {
+                endDateInput.setCustomValidity('');
+            }
+        });
+
+        // Ensure the start date is not in the past
+        startDateInput.addEventListener('change', function() {
+            if (new Date(startDateInput.value) < new Date()) {
+                startDateInput.setCustomValidity('Start date cannot be in the past.');
+            } else {
+                startDateInput.setCustomValidity('');
+            }
+        });
+    </script>
+</body>
+</html>

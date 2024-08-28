@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/933d280937.js" crossorigin="anonymous"></script>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f8f9fa;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 30px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 0 18px rgba(0, 0, 0, 0.459);
+      position: relative;
+    }
+
+    .logo {
+      width: 100px;
+      display: block;
+      margin: 0 auto 20px;
+    }
+
+    .imgg {
+      transition: all 0.2s ease-in-out;
+    }
+
+    .imgg:hover {
+      transform: scale(1.2);
+    }
+
+    .image-container {
+      border-radius: 10px;
+      box-shadow: 0 0 18px rgba(0, 0, 0, 0.281);
+      overflow: hidden;
+      display: none; /* Hide by default */
+    }
+
+    @media (min-width: 768px) {
+      .image-container {
+        display: block; /* Show on medium screens and larger */
+      }
+
+      .login-container {
+        margin-right: 20px; /* Add margin for larger screens */
+      }
+    }
+  </style>
+  <title>Login</title>
+</head>
+
+<body>
+  <div class="d-flex flex-column flex-md-row justify-content-center align-items-center">
+    <div class="login-container">
+      <a href="/admin/login/" tabindex="-1">
+        <img src="/images/welcome.png" alt="Logo" class="logo">
+      </a>
+      <h2 class="text-center">Login</h2>
+
+      <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+        <div class="alert alert-danger" role="alert">
+          <ul class="mb-0">
+            <% errors.forEach(function(error) { %>
+              <li><%= error.msg %></li>
+            <% }) %>
+          </ul>
+        </div>
+      <% } %>
+
+      <form action="/login" method="POST">
+        <div class="mb-3">
+          <label for="email" class="form-label">Email address</label>
+          <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Login</button>
+        <p class="mt-3 text-center">Don't have an account? <a href="/register">Register</a></p>
+      </form>
+    </div>
+    <div class="image-container">
+      <img src="/images/login-aside.avif" class="imgg img-fluid" alt="Login Image">
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

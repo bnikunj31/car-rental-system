@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reservations</title>
+  <!-- Bootstrap 5 CSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous"
+  />
+  <link
+    rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.3/css/bootstrap.min.css"
+  />
+  <!-- Date Picker CSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css"
+  />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: Arial, sans-serif;
+    }
+    .card-container {
+      margin-bottom: 20px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+    }
+    .card-container:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .card-header {
+      background-color: #343a40;
+      color: #fff;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+      transition: transform 0.3s ease;
+    }
+    .form-group:hover {
+      transform: scale(1.02);
+    }
+    .btn-primary {
+      margin-top: 1rem;
+      background-color: #007bff;
+      border: none;
+    }
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+    h1,
+    h2 {
+      color: #343a40;
+    }
+    .container {
+      padding: 2rem;
+      border-radius: 10px;
+      background-color: #ffffff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .edit-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      border: none;
+      cursor: pointer;
+    }
+    .edit-btn:hover {
+      text-decoration: underline;
+    }
+    .edit-form {
+      display: none;
+      margin-top: 20px;
+    }
+    .search-bar {
+      margin-bottom: 1rem;
+    }
+    .small-review {
+      max-width: 100%;
+      font-size: 0.875rem;
+    }
+    .small-review .rating label {
+      font-size: 1.25rem;
+    }
+    .small-review .form-group {
+      margin-bottom: 0.75rem;
+    }
+    .small-review textarea {
+      font-size: 0.875rem;
+      padding: 0.5rem;
+    }
+    .small-review button {
+      font-size: 0.875rem;
+      padding: 0.25rem 0.75rem;
+    }
+    .rating {
+      direction: rtl;
+      display: inline-block;
+      font-size: 1.5em;
+      unicode-bidi: bidi-override;
+    }
+    .rating input[type="radio"] {
+      display: none;
+    }
+    .rating label {
+      color: #ddd;
+      cursor: pointer;
+      font-size: 2rem;
+    }
+    .rating label:hover,
+    .rating label:hover ~ label,
+    .rating input[type="radio"]:checked ~ label {
+      color: #ffc107;
+    }
+    /* Navbar */
+    .navbar-brand img {
+      margin-right: 10px;
+    }
+    .nav-link {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #ffffff !important;
+      margin-right: 15px;
+      transition: color 0.3s ease;
+    }
+    .nav-link:hover,
+    .nav-link.active {
+      color: #adb5bd !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top mb-5">
+    <a class="navbar-brand" href="/">
+      <img
+        src="/images/logo.png"
+        width="30"
+        height="30"
+        class="d-inline-block align-top"
+        alt="Logo"
+      />
+      Rent To Drive
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/vehicles">Available Vehicles</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/add-vehicle">Add Vehicle</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="/reservations">Reservations</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/profile">Profile</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/logout">Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container mt-5">
+    <h2 class="mb-4">Make a Reservation</h2>
+
+    <!-- Search Bar -->
+    <div class="search-bar mb-4">
+      <input
+        type="text"
+        id="searchBar"
+        class="form-control"
+        placeholder="Search for a vehicle..."
+      />
+    </div>
+
+    <!-- Display Alerts -->
+    <% if (error) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <%= error %>
+    </div>
+    <% } %>
+    <% if (success) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <%= success %>
+    </div>
+    <% } %>
+
+    <!-- Reservation Form -->
+    <form id="reservationForm" action="/reservations" method="post">
+      <div class="form-group">
+        <label for="vehicleId">Select Vehicle</label>
+        <select class="form-select" id="vehicleId" name="vehicleId" required>
+          <% vehicles.forEach(vehicle => { %>
+          <option
+            value="<%= vehicle._id %>"
+            data-make="<%= vehicle.make %>"
+            data-model="<%= vehicle.model %>"
+            data-price="<%= vehicle.pricePerDay %>"
+          >
+            <%= vehicle.make %> <%= vehicle.model %> ($<%= vehicle.pricePerDay %>/day)
+          </option>
+          <% }) %>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="startDate">Start Date</label>
+        <input
+          type="text"
+          class="form-control datepicker"
+          id="startDate"
+          name="startDate"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="endDate">End Date</label>
+        <input
+          type="text"
+          class="form-control datepicker"
+          id="endDate"
+          name="endDate"
+          required
+        />
+      </div>
+      <div
+        class="alert alert-danger mt-3"
+        id="dateAlert"
+        style="display: none"
+      >
+        End date must be after start date.
+      </div>
+      <button type="submit" class="btn btn-primary">Reserve</button>
+    </form>
+
+    <h1 class="my-4">Your Reservations</h1>
+
+    <!-- Reservations List -->
+    <div id="reservationsList">
+      <% reservations.forEach(reservation => { %>
+      <div class="card card-container">
+        <div class="card-header">
+          <strong><%= reservation.vehicle.make %> <%= reservation.vehicle.model %></strong>
+          <!-- Edit Button -->
+          <form action="/reservations/edit/<%= reservation._id %>" method="get">
+            <button 
+              class="btn btn-outline-warning edit-btn" 
+              type="submit"
+              <% if (payment_status === 'Payment Successful') { %>
+                disabled
+              <% } %>
+            >
+              Edit
+            </button>
+          </form>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <!-- Left: Reservation Details -->
+            <div class="col-md-6">
+              <p class="card-text">
+                From <%= reservation.startDate.toDateString() %> to <%= reservation.endDate.toDateString() %>
+              </p>
+              <p class="card-text">
+                <span class="text-success">Total Cost: $<%= reservation.totalCost %></span>
+              </p>
+              <!-- Cancel Reservation Button -->
+              <form action="/reservations/<%= reservation._id %>?_method=DELETE" method="POST" class="d-inline">
+                <button 
+                  type="submit" 
+                  class="btn btn-danger"
+                  <% if (payment_status === 'Payment Successful') { %>
+                    disabled
+                  <% } %>
+                >
+                  Cancel Reservation
+                </button>
+              </form>
+              <!-- Pay Button -->
+              <% if (payment_status === 'Payment Successful') { %>
+              <button type="button" class="btn btn-success" disabled>Paid</button>
+              <% } else { %>
+              <form action="/payment/checkout/<%= reservation._id %>" method="post" class="d-inline">
+                <input type="hidden" name="amount" value="<%= reservation.totalCost %>" />
+                <button type="submit" class="btn btn-success">Pay $<%= reservation.totalCost %></button>
+              </form>
+              <% } %>
+            </div>
+    
+            <!-- Right: Review Form -->
+            <div class="col-md-6">
+              <h5 class="mt-3">Leave a Review</h5>
+              <form action="/reviews" method="POST" class="small-review">
+                <input type="hidden" name="vehicleId" value="<%= reservation.vehicle._id %>" />
+                <input type="hidden" name="reservationId" value="<%= reservation._id %>" />
+                <input type="hidden" name="userId" value="<%= reservation.user._id %>" />
+                <div class="rating">
+                  <input type="radio" id="star5-<%= reservation._id %>" name="rating" value="5" /><label for="star5-<%= reservation._id %>">★</label>
+                  <input type="radio" id="star4-<%= reservation._id %>" name="rating" value="4" /><label for="star4-<%= reservation._id %>">★</label>
+                  <input type="radio" id="star3-<%= reservation._id %>" name="rating" value="3" /><label for="star3-<%= reservation._id %>">★</label>
+                  <input type="radio" id="star2-<%= reservation._id %>" name="rating" value="2" /><label for="star2-<%= reservation._id %>">★</label>
+                  <input type="radio" id="star1-<%= reservation._id %>" name="rating" value="1" /><label for="star1-<%= reservation._id %>">★</label>
+                </div>
+                <textarea class="form-control mt-2" name="review" rows="3" placeholder="Write your review..."></textarea>
+                <button type="submit" class="btn btn-primary mt-2">Submit Review</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    
+  </div>
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Date Picker JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      $('.datepicker').datepicker({
+        format: 'yyyy-mm-dd',
+        startDate: '0d'
+      });
+  
+      // Form validation
+      $('#reservationForm').on('submit', function (e) {
+        const startDate = new Date($('#startDate').val());
+        const endDate = new Date($('#endDate').val());
+        if (endDate <= startDate) {
+          e.preventDefault();
+          $('#dateAlert').show();
+        } else {
+          $('#dateAlert').hide();
+        }
+      });
+  
+      // Search functionality for dropdown
+      $('#searchBar').on('input', function () {
+        const query = $(this).val().toLowerCase();
+        $('#vehicleId option').each(function () {
+          const make = $(this).data('make').toLowerCase();
+          const model = $(this).data('model').toLowerCase();
+          if (make.includes(query) || model.includes(query)) {
+            $(this).show();
+          } else {
+            $(this).hide();
+          }
+        });
+      });
+    });
+  </script>
+  
+  
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        .btn-disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h3>OTP Verification</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-center text-muted"><%= message %></p>
+                        <form action="/otp" method="POST">
+                            <input type="hidden" name="email" value="<%= email %>">
+                            <div class="mb-3">
+                                <label for="enteredOtp" class="form-label">Enter your OTP</label>
+                                <input type="text" name="enteredOtp" id="enteredOtp" class="form-control" placeholder="Enter your OTP" required>
+                            </div>
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-primary">Verify OTP</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXlUc6/4OVm9PjEYIeaAHUPoN4i8Y7Qp/7tnMOaaExl5DkZlGVLYQw6quEoh" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiSkKKVRIBTYyJ1duZ3I5W6pL6Xb8vYjQ2mkjvv+ydxIh7MFpHCA5wpTs" crossorigin="anonymous"></script>
+</body>
+</html>

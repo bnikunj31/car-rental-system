@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thanks for Your Order!</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .thank-you-section {
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      padding: 40px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 1.5s ease-in-out;
+    }
+    .thank-you-section h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+    .thank-you-section p {
+      font-size: 1.25rem;
+      margin-bottom: 20px;
+    }
+    .thank-you-section a {
+      color: #595cff;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .thank-you-section a:hover {
+      text-decoration: underline;
+    }
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="thank-you-section">
+    <h1>Thank You for Your Order!</h1>
+    <p>We appreciate your business! If you have any questions, please email us at
+      <a href="mailto:nikunj.banssal@gmail.com" style="color: whitesmoke;">nikunj.banssal@gmail.com</a>.
+    </p>
+    <a href="/reservations?success=Payment+Successful" class="btn btn-light mt-3">Return to Home</a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+  

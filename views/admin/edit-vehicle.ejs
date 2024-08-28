@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Vehicle</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Edit Vehicle</h1>
+
+        <!-- Update Vehicle Form -->
+        <form action="/admin/update-vehicle/<%= vehicle._id %>" method="POST">
+            <div class="mb-3">
+                <label for="make" class="form-label">Make</label>
+                <input type="text" id="make" name="make" class="form-control" value="<%= vehicle.make %>" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="model" class="form-label">Model</label>
+                <input type="text" id="model" name="model" class="form-control" value="<%= vehicle.model %>" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="year" class="form-label">Year</label>
+                <input type="number" id="year" name="year" class="form-control" value="<%= vehicle.year %>" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="pricePerDay" class="form-label">Price per Day</label>
+                <input type="number" id="pricePerDay" name="pricePerDay" class="form-control" value="<%= vehicle.pricePerDay %>" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea id="description" name="description" class="form-control" rows="3" required><%= vehicle.description %></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="availability" class="form-label">Availability</label>
+                <select id="availability" name="availability" class="form-select" required>
+                    <option value="true" <%= vehicle.availability ? 'selected' : '' %>>Available</option>
+                    <option value="false" <%= !vehicle.availability ? 'selected' : '' %>>Not Available</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update Vehicle</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
