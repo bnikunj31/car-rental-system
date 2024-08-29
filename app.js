@@ -46,6 +46,6 @@ app.get('/add-vehicle', (req, res) => {
 });
 
 // Starting Server on PORT 3000
-app.listen(3000, () => {
-  console.log('Server running on http://localhost:3000');
+app.listen(10000, () => {
+  console.log('Server running on http://localhost:10000');
 });
