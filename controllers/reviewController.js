@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Review = require('../models/review'); // Ensure the path is correct
+const Review = require('../models/Review'); // Ensure the path is correct
 const User = require('../models/User');
 const Vehicle = require('../models/Vehicle');
 const Record = require('./adminController');

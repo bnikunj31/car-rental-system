@@ -1,6 +1,6 @@
 // controllers/vehicleController.js
 const Vehicles = require("../models/Vehicle");
-const Review = require("../models/review");
+const Review = require("../models/Review");
 const Record = require('../controllers/adminController');
 const Reservations = require('../models/Reservation');
 

@@ -1,6 +1,6 @@
 // Models
 const User = require('../models/User');
-const Review = require('../models/review');
+const Review = require('../models/Review');
 const Vehicle = require('../models/Vehicle');
 const Activity = require('../models/Activity');    
 const Reservation = require('../models/Reservation');

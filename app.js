@@ -10,7 +10,7 @@ const reservationRoutes = require('./routes/reservation');
 const adminRoutes = require('./routes/adminRoutes');
 const vehicleRoutes = require('./routes/vehicle');
 const paymentRoutes = require('./routes/paymentRoutes');
-const reviewRoutes = require('./routes/review');
+const reviewRoutes = require('./routes/Review');
 const authRoutes = require('./routes/auth');
 const connectDB = require('./config/db');
 
