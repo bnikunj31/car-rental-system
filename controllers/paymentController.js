@@ -1,10 +1,9 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Reservation = require('../models/Reservation');
 const Vehicle = require('../models/Vehicle');
 
-const YOUR_DOMAIN = 'http://localhost:3000';
-
+const YOUR_DOMAIN = 'https://car-rental-system-2720.onrender.com';
 exports.createCheckoutSession = async (req, res) => {
+    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
     try {
         const reservationId = req.params.id;
         const reservation = await Reservation.findById(reservationId);
