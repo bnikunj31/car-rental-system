@@ -45,7 +45,7 @@ exports.createReview = async (req, res) => {
         // Redirect to reservations page with success message
         res.redirect('/reservations?success=Review submitted successfully');
     } catch (err) {
-        console.error(err);
+        // console.error(err);
         res.redirect('/reservations?error=Error submitting review');
     }
 };

@@ -15,25 +15,27 @@ const getProfile = async (req, res) => {
     // Fetch all reservations for the user's vehicles and populate the user who made the reservation
     const vehicleIds = vehicles.map(vehicle => vehicle._id);
     const reservations = await Reservation.find({ vehicle: { $in: vehicleIds } })
-      .populate('vehicle')
-      .populate('user', 'name email phoneNumber'); // Populate with user's name, email, and phone number
-    // Count the number of vehicles
+      .populate({
+        path: 'user',
+        select: 'name email phoneNumber'
+      })
+      .populate('vehicle');
+
     const vehicleCount = vehicles.length;
 
-    // Render the profile page with fetched data, including phone number
     res.render('profile', {
       user,
       vehicleCount,
       vehicles,
       reservations,
-      // phoneNumber: reservations[0].user.phoneNumber
     });
     
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).send('Server Error');
   }
 };
+
 
 
 
@@ -45,7 +47,7 @@ const editProfile = (req, res) => {
         phoneNumber: req.user.phoneNumber // Pass phone number to the edit-profile template
       });
   } catch (err) {
-      console.error(err);
+      // console.error(err);
       res.status(500).send('Server Error');
   }
 };
@@ -80,7 +82,7 @@ const updateProfile = async (req, res) => {
     await user.save();
     res.redirect('/profile');
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).send('Server Error');
   }
 };

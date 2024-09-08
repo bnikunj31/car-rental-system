@@ -12,13 +12,13 @@ const getReservations = async (req, res) => {
     const vehicles = await Vehicle.find();
     res.render('reservations', { 
       reservations, 
-      vehicles, 
+      vehicles,
       error: req.query.error, 
       success: req.query.success, 
       payment_status: req.query.success
     });
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.redirect('/reservations?error=Server Error');
   }
 };
@@ -82,7 +82,7 @@ const makeReservation = async (req, res) => {
 
     res.redirect('/reservations?success=Reservation made successfully');
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     res.redirect('/reservations?error=Error making reservation');
   }
 };
@@ -123,7 +123,7 @@ const cancelReservation = async (req, res) => {
 
     res.redirect('/reservations?success=Reservation canceled successfully');
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     res.redirect('/reservations?error=Server Error');
   }
 };

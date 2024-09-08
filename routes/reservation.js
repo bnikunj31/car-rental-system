@@ -28,23 +28,30 @@ router.get('/search', async (req, res) => {
         // Return the vehicles in JSON format
         res.json({ vehicles });
     } catch (err) {
-        console.error(err);
+        // console.error(err);
         res.status(500).send('Server Error');
     }
 });
 router.get('/edit/:id', async (req, res) => {
   try {
-      const reservation = await Reservation.findById(req.params.id);
-      
-      if (!reservation) {
-          return res.status(404).send('Reservation not found');
-      }
-
-      res.render('edit-reservation', { reservation });
+    // Find the reservation by ID and populate the vehicle field
+    const reservation = await Reservation.findById(req.params.id).populate('vehicle');
+    
+    // Check if reservation exists
+    if (!reservation) {
+      return res.status(404).send('Reservation not found');
+    }
+    
+    // Extract pricePerDay from the vehicle
+    const pricePerDay = reservation.vehicle.pricePerDay;
+    // Render the edit-reservation view with reservation and vehicle details
+    res.render('edit-reservation', { reservation, pricePerDay });
   } catch (err) {
-      res.status(500).send('Server Error');
+    // console.error(err);
+    res.status(500).send('Server Error');
   }
 });
+
 router.patch('/edit/:id', protect, async (req, res) => {
   try {
     const reservation = await Reservation.findById(req.params.id);
@@ -54,16 +61,35 @@ router.patch('/edit/:id', protect, async (req, res) => {
 
     const today = new Date();
     const start = new Date(req.body.startDate);
+    const end = new Date(req.body.endDate);
 
     // Check if the start date is in the past
     if (start < today.setHours(0, 0, 0, 0)) {
       return res.redirect(`/reservations/edit/${req.params.id}?error=Start date cannot be in the past`);
     }
 
-    reservation.startDate = start;
-    reservation.endDate = new Date(req.body.endDate);
+    // Check if the end date is before the start date
+    if (end <= start) {
+      return res.redirect(`/reservations/edit/${req.params.id}?error=End date must be after the start date`);
+    }
 
-    const vehicle = await Vehicle.findById(reservation.vehicle).select('make model');
+    // Calculate the number of days between start and end dates
+    const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+    // Retrieve the vehicle's daily rate
+    const vehicle = await Vehicle.findById(reservation.vehicle).select('pricePerDay');
+    if (!vehicle) {
+      return res.status(404).send('Vehicle not found');
+    }
+
+    const dailyRate = vehicle.pricePerDay;
+    const totalCost = days * dailyRate;
+
+    // Update reservation details
+    reservation.startDate = start;
+    reservation.endDate = end;
+    reservation.totalCost = totalCost;
+
     const user = await User.findById(reservation.user).select('name');
 
     // Ensure req.user is defined
@@ -74,16 +100,17 @@ router.patch('/edit/:id', protect, async (req, res) => {
         `${user.name} edited the reservation for ${vehicle.make} ${vehicle.model}`
       );
     } else {
-      console.error('User not authenticated');
+      // console.error('User not authenticated');
     }
 
     await reservation.save();
 
     res.redirect('/reservations/');
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).send('Server Error');
   }
 });
+
 
 module.exports = router;

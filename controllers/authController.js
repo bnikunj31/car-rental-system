@@ -1,28 +1,46 @@
-// Packages
 const { check, validationResult } = require('express-validator');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const Record = require('../controllers/adminController');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const twilio = require('twilio');
+const otpGenerator = require('otp-generator');
+require('dotenv').config();
 
-// Nodemailer setup
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'nikunj.banssal@gmail.com',
-    pass: 'peng pqxi nzmx bbit' // Ensure to use environment variables for sensitive data
-  }
-});
+// Captcha Generator
+const generateCaptcha = () => {
+  return otpGenerator.generate(6, { upperCase: false, specialChars: false });
+};
+
+// Twilio credentials
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
+if (!accountSid || !authToken || !verifyServiceSid) {
+  console.log('Twilio credentials or Verify Service SID is missing');
+}
+
+const client = twilio(accountSid, authToken);
 
 // Helper Function to Generate OTP
 const generateOTP = () => {
   return crypto.randomInt(100000, 999999).toString();
 };
 
-// Controller for Registration
+// Nodemailer setup
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS // Use environment variables
+  }
+});
+
+// Temporary user store (consider using a more persistent solution)
 const tempUserStore = {};
 
+// Controller for Registration
 const register = async (req, res) => {
   // Validation checks
   const errors = validationResult(req);
@@ -38,93 +56,150 @@ const register = async (req, res) => {
       return res.status(400).json({ error: 'User already exists' });
     }
 
-    const otp = generateOTP();
+    const emailOtp = generateOTP();
+    const phoneOtp = generateOTP();
     const otpExpires = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
 
-    // Store user data temporarily
-    tempUserStore[email] = { name, email, phoneNumber, password, otp, otpExpires };
+    // Store OTPs in session
+    req.session.emailOtp = emailOtp;
+    req.session.phoneOtp = phoneOtp;
+    req.session.emailOtpExpires = otpExpires;
+    req.session.phoneOtpExpires = otpExpires;
+    req.session.registrationData = { name, email, phoneNumber, password }; // Store registration data temporarily
 
+    // Send OTP via email
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: 'Your OTP Code for Car Rental System',
-      text: `Your OTP code is ${otp}. It will expire in 10 minutes.`
+      subject: 'Car Rental System Verification',
+      text: `Your email OTP code is ${emailOtp}. It will expire in 10 minutes.`
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
-        return res.status(500).json({ error: 'Error sending OTP' });
+        // console.error('Error sending OTP via email:', error);
+        if (!res.headersSent) {
+          return res.status(500).json({ error: 'Error sending OTP via email' });
+        }
       }
-
-      res.render('otp', { email, message: 'Please enter the OTP sent to your email.' });
     });
+    // Send OTP via SMS using Twilio
+    client.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID)
+      .verifications
+      .create({ to: `+91${phoneNumber}`, channel: 'sms' })
+      .then(verification => {
+        if (!res.headersSent) {
+          res.render('otp', { email, phonenumber:phoneNumber, message: 'Please enter the OTPs sent to your email and phone.' });
+        }
+      })
+      .catch(err => {
+        console.error('Error sending SMS:', err.message);
+        if (!res.headersSent) {
+          return res.status(500).json({ error: 'Error sending OTP via SMS' });
+        }
+      });
+
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    if (!res.headersSent) {
+      res.status(400).json({ error: error.message });
+    }
   }
 };
 
+// Controller for OTP Verification
 const verifyOtp = async (req, res) => {
-  const { enteredOtp, email } = req.body;
+  const { email, emailOtp, phoneOtp } = req.body;
+  phoneNumber = req.session.registrationData.phoneNumber
 
   try {
-    const tempUser = tempUserStore[email];
-
-    if (!tempUser) {
-      return res.status(400).render('otp', { message: 'User not found.' });
+    // Check if registration data exists in session
+    const sessionData = req.session.registrationData;
+    if (!sessionData) {
+      return res.status(400).render('otp', { email, message: 'Session expired. Please register again.' });
     }
 
+    // Check if OTPs match and are valid
     const currentTime = Date.now();
-    if (tempUser.otp !== enteredOtp) {
-      return res.status(400).render('otp', { email, message: 'Invalid OTP. Please try again.' });
-    } else if (tempUser.otpExpires < currentTime) {
-      return res.status(400).render('otp', { email, message: 'OTP has expired. Please request a new one.' });
+    if (
+      sessionData.emailOtp !== emailOtp ||
+      sessionData.phoneOtp !== phoneOtp ||
+      sessionData.emailOtpExpires < currentTime ||
+      sessionData.phoneOtpExpires < currentTime
+    ) {
+      return res.status(400).render('otp', { email, message: 'Invalid OTPs. Please try again.' });
     }
 
+    // Create and save the new user
+    const { name, password } = sessionData;
     const newUser = new User({
-      name: tempUser.name,
-      email: tempUser.email,
-      phoneNumber: tempUser.phoneNumber, // Store phone number
-      password: tempUser.password,
+      name,
+      email,
+      phoneNumber,  // Ensure this is included
+      password,
       isVerified: true // Mark the user as verified
     });
 
     await newUser.save();
-    await Record.logActivity(newUser._id, `${newUser.name} Registered to the Application`);
 
-    delete tempUserStore[email];
+    // Clear session data
+    req.session.registrationData = null;
+    req.session.emailOtp = null;
+    req.session.phoneOtp = null;
 
-    return res.redirect('/login');
+    // Redirect to login page
+    res.redirect('/login');
   } catch (error) {
-    console.error('Error verifying OTP:', error);
+    // console.error('Error verifying OTP:', error);
     res.status(400).render('otp', { email, message: 'Error verifying OTP. Please try again.' });
   }
+};
+
+
+const showLoginPage = (req, res) => {
+  req.session.captcha = generateCaptcha(); // Generate new CAPTCHA on page load
+  res.render('login', { captcha: req.session.captcha }); // Pass CAPTCHA to the view
 };
 
 // Controller for Login
 const login = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).render('login', { errors: errors.array() });
+    return res.status(400).render('login', { errors: errors.array(), captcha: req.session.captcha });
   }
 
-  const { email, password } = req.body;
+  const { email, password, captchaInput } = req.body;
 
   try {
-    const user = await User.findOne({ email });
-
-    if (!user || !(await user.matchPassword(password))) {
-      return res.status(400).render('login', { errors: [{ msg: 'Invalid credentials' }] });
+    // Verify CAPTCHA
+    if (captchaInput !== req.session.captcha) {
+      // CAPTCHA is incorrect, regenerate and show the new CAPTCHA
+      req.session.captcha = generateCaptcha();
+      return res.status(400).render('login', {
+        errors: [{ msg: 'Invalid CAPTCHA' }],
+        captcha: req.session.captcha // Pass the new CAPTCHA to the frontend
+      });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
-    });
+    const user = await User.findOne({ email });
+    if (!user || !(await user.matchPassword(password))) {
+      req.session.captcha = generateCaptcha(); // Regenerate CAPTCHA
+      return res.status(400).render('login', {
+        errors: [{ msg: 'Invalid credentials' }],
+        captcha: req.session.captcha // Pass new CAPTCHA to the frontend
+      });
+    }
 
-    res.cookie('token', token, { httpOnly: true });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '10y' });
+
+    res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict' });
     await Record.logActivity(user._id, `${user.name} Login to the Application`);
-    res.redirect('/vehicles');
+    res.redirect(`/vehicles?token=${token}`);
   } catch (error) {
-    res.status(400).render('login', { errors: [{ msg: 'Error logging in user' }] });
+    req.session.captcha = generateCaptcha(); // Regenerate CAPTCHA
+    res.status(400).render('login', {
+      errors: [{ msg: 'Error logging in user' }],
+      captcha: req.session.captcha // Pass new CAPTCHA to the frontend
+    });
   }
 };
 
@@ -136,7 +211,7 @@ const logout = (req, res) => {
 
 // Controller for Resending OTP
 const resendOtp = async (req, res) => {
-  const { email } = req.body;
+  const { email, phoneNumber } = req.body;
 
   try {
     const user = await User.findOne({ email });
@@ -145,18 +220,22 @@ const resendOtp = async (req, res) => {
       return res.status(400).json({ success: false, message: 'User not found.' });
     }
 
-    const otp = generateOTP();
+    const emailOtp = generateOTP();
+    const phoneOtp = generateOTP();
     const otpExpires = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
 
-    user.otp = otp;
-    user.otpExpires = otpExpires;
-    await user.save();
+    // Update OTPs in session
+    req.session.emailOtp = emailOtp;
+    req.session.phoneOtp = phoneOtp;
+    req.session.emailOtpExpires = otpExpires;
+    req.session.phoneOtpExpires = otpExpires;
 
+    // Send OTP via email
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
       subject: 'Your OTP Code for Car Rental System',
-      text: `Your new OTP code is ${otp}. It will expire in 10 minutes.`
+      text: `Your new OTP codes are Email: ${emailOtp} and Phone: ${phoneOtp}. They will expire in 10 minutes.`
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -164,10 +243,21 @@ const resendOtp = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Error sending OTP.' });
       }
 
-      res.json({ success: true, message: 'OTP resent successfully.' });
+      // Send OTP via SMS using Twilio
+      
+      client.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID)
+        .verifications
+        .create({ to: `+91${phoneNumber}`, channel: 'sms' })
+        .then(verification => {
+          res.json({ success: true, message: 'OTP resent successfully.' });
+        })
+        .catch(err => {
+          // console.error('Error sending SMS:', err.message);
+          res.status(500).json({ success: false, message: 'Error sending OTP via SMS.' });
+        });
     });
   } catch (error) {
-    console.error('Error resending OTP:', error);
+    // console.error('Error resending OTP:', error);
     res.status(500).json({ success: false, message: 'Error resending OTP.' });
   }
 };
@@ -188,6 +278,7 @@ module.exports = {
     login
   ],
   logout,
+  showLoginPage,
   verifyOtp,
   resendOtp
 };

@@ -44,17 +44,58 @@
       border-radius: 10px;
       box-shadow: 0 0 18px rgba(0, 0, 0, 0.281);
       overflow: hidden;
-      display: none; /* Hide by default */
+      display: none;
     }
 
     @media (min-width: 768px) {
       .image-container {
-        display: block; /* Show on medium screens and larger */
+        display: block;
       }
 
       .login-container {
-        margin-right: 20px; /* Add margin for larger screens */
+        margin-right: 20px;
       }
+    }
+
+    .password-container {
+      position: relative;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 15px;
+      top: 75%;
+      transform: translateY(-50%);
+      cursor: pointer;
+    }
+
+    /* Custom styles for CAPTCHA */
+    .captcha-container {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .captcha-text {
+      font-size: 1.25rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      color: #d3d3d3; /* Light gray color */
+      background-color: #e2e2e2; /* Slightly darker gray background */
+      padding: 10px;
+      border-radius: 5px;
+      margin-left: 10px; /* Add space between label and text */
+    }
+
+    .refresh-captcha {
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: #007bff;
+      margin-left: 10px;
+    }
+
+    .refresh-captcha:hover {
+      color: #0056b3;
     }
   </style>
   <title>Login</title>
@@ -83,11 +124,23 @@
           <label for="email" class="form-label">Email address</label>
           <input type="email" class="form-control" id="email" name="email" required>
         </div>
-        <div class="mb-3">
+        <div class="mb-3 password-container">
           <label for="password" class="form-label">Password</label>
           <input type="password" class="form-control" id="password" name="password" required>
+          <i class="fas fa-eye toggle-password" id="togglePassword"></i>
         </div>
-        <button type="submit" class="btn btn-primary w-100">Login</button>
+
+        <!-- CAPTCHA Section -->
+        <div class="form-group">
+          <div class="captcha-container">
+            <label for="captcha">CAPTCHA:</label>
+            <div class="captcha-text" id="captchaText"><%= captcha %></div>
+            <!-- <i class="fas fa-sync-alt refresh-captcha" id="refreshCaptcha" title="Refresh CAPTCHA"></i> -->
+          </div>
+          <input type="text" name="captchaInput" class="form-control mt-2" placeholder="Enter CAPTCHA" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 my-2">Login</button>
         <p class="mt-3 text-center">Don't have an account? <a href="/register">Register</a></p>
       </form>
     </div>
@@ -96,6 +149,29 @@
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#password');
+
+    togglePassword.addEventListener('click', function () {
+      const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+      password.setAttribute('type', type);
+      this.classList.toggle('fa-eye-slash');
+    });
+
+    // Refresh CAPTCHA functionality
+    const refreshCaptcha = document.querySelector('#refreshCaptcha');
+    const captchaText = document.querySelector('#captchaText');
+
+    refreshCaptcha.addEventListener('click', function () {
+      fetch('/refresh-captcha')
+        .then(response => response.text())
+        .then(newCaptcha => {
+          captchaText.textContent = newCaptcha;
+        })
+        .catch(err => console.error(err));
+    });
+  </script>
 </body>
 
 </html>

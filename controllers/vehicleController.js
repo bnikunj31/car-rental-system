@@ -1,22 +1,36 @@
 // controllers/vehicleController.js
+const Users = require('../models/User');
 const Vehicles = require("../models/Vehicle");
 const Review = require("../models/Review");
 const Record = require('../controllers/adminController');
 const Reservations = require('../models/Reservation');
+const protect = require('../middleware/auth');
+
 
 
 const getVehicles = async (req, res) => {
   try {
+    const token = req.cookies.token;
     const vehicles = await Vehicles.find().lean();
+
+    // Calculate the average rating for each vehicle
     for (let vehicle of vehicles) {
       const reviews = await Review.find({ vehicle: vehicle._id });
       vehicle.avgRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length || 0;
     }
-    res.render("vehicles", { vehicles });
+
+    // const tokenExists = !!token;
+
+    res.render("vehicles", { 
+      vehicles: vehicles, 
+      users: Users, 
+      token: token 
+    });
   } catch (error) {
     res.status(400).json({ error: "Error fetching vehicles" });
   }
 };
+
 
 const getVehicleById = async (req, res) => {
   try {
@@ -132,7 +146,7 @@ const deleteVehicle = async (req, res) => {
 
     res.redirect("/vehicles");
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     res.status(400).json({ error: "Error deleting vehicle" });
   }
 };

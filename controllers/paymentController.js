@@ -33,7 +33,7 @@ exports.createCheckoutSession = async (req, res) => {
 
         res.redirect(303, session.url);
     } catch (error) {
-        console.error('Error creating checkout session:', error);
+        // console.error('Error creating checkout session:', error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };

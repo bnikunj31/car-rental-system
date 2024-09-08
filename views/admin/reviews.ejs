@@ -13,6 +13,14 @@
         .centered {
             text-align: center;
         }
+        .read-more {
+            color: blue;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .full-comment {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -57,7 +65,7 @@
                         <th>User</th>
                         <th>Vehicle</th>
                         <th>Rating</th>
-                        <th>Comment</th>
+                        <th style="width: 40%;">Comment</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -79,7 +87,15 @@
                             <% } %>
                         </td>
                         <td><%= review.rating %></td>
-                        <td><%= review.comment %></td>
+                        <td>
+                            <% if (review.comment.length > 100) { %>
+                                <span class="short-comment"><%= review.comment.substring(0, 100) %>...</span>
+                                <span class="full-comment"><%= review.comment %></span>
+                                <span class="read-more">Read More</span>
+                            <% } else { %>
+                                <%= review.comment %>
+                            <% } %>
+                        </td>
                         <td>
                             <form action="/admin/delete-review/<%= review._id %>" method="POST" style="display:inline;">
                                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>
@@ -88,12 +104,29 @@
                     </tr>
                     <% }) %>
                 </tbody>
-                
             </table>
         </div>
     </div>
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelectorAll('.read-more').forEach(button => {
+            button.addEventListener('click', function() {
+                const shortComment = this.previousElementSibling.previousElementSibling;
+                const fullComment = this.previousElementSibling;
+                
+                if (fullComment.style.display === 'none' || fullComment.style.display === '') {
+                    fullComment.style.display = 'inline';
+                    shortComment.style.display = 'none';
+                    this.textContent = 'Read Less';
+                } else {
+                    fullComment.style.display = 'none';
+                    shortComment.style.display = 'inline';
+                    this.textContent = 'Read More';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

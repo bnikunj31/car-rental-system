@@ -4,7 +4,7 @@ const User = require('../models/User');
 
 const protect = async (req, res, next) => {
   const token = req.cookies.token;
-
+  
   if (!token) {
     return res.status(401).redirect('/login');
   }

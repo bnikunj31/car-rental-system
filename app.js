@@ -1,51 +1,57 @@
-// Packages
 const path = require('path');
 const dotenv = require('dotenv');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const methodOverride = require('method-override');
-
-// Routes Imported
-const reservationRoutes = require('./routes/reservation');
-const adminRoutes = require('./routes/adminRoutes');
-const vehicleRoutes = require('./routes/vehicle');
-const paymentRoutes = require('./routes/paymentRoutes');
-const reviewRoutes = require('./routes/review');
-const authRoutes = require('./routes/auth');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const connectDB = require('./config/db');
 
-// DB Connecting
+// Load environment variables
 dotenv.config();
+
+// Connect to MongoDB
 connectDB();
 
 const app = express();
+
+// Middleware
 app.use(methodOverride('_method')); // Override method for forms (frontend)
 app.use(express.urlencoded({ extended: true })); // Middleware for parsing URL-encoded bodies
 app.use(express.json()); // Middleware for parsing JSON bodies
+app.use(cookieParser()); // Cookies
 
-// View Engine for Frontend
+// Session middleware
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'yourSecretKey',
+  resave: false,
+  saveUninitialized: true,
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }), // Use MongoDB for session storage
+  cookie: { secure: process.env.NODE_ENV === 'production' } // Set to true if using HTTPS
+}));
+
+// View Engine
 app.set('view engine', 'ejs');
-app.use(cookieParser());  // Cookies
 
-// Multer related code
+// Static Files
 app.use(express.static(path.join(__dirname, 'public')));
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/uploads/profile_pics', express.static(path.join(__dirname, 'uploads','profile_pics')));
+app.use('/uploads/profile_pics', express.static(path.join(__dirname, 'uploads', 'profile_pics')));
 
 // Routes
-app.use('/', authRoutes);
-app.use('/admin', adminRoutes);
-app.use('/reviews', reviewRoutes);
-app.use('/payment', paymentRoutes);
-app.use('/vehicles', vehicleRoutes);
-app.use('/reservations', reservationRoutes);
+app.use('/', require('./routes/auth'));
+app.use('/admin', require('./routes/adminRoutes'));
+app.use('/reviews', require('./routes/review'));
+app.use('/payment', require('./routes/paymentRoutes'));
+app.use('/vehicles', require('./routes/vehicle'));
+app.use('/reservations', require('./routes/reservation'));
 
-
+// Additional route
 app.get('/add-vehicle', (req, res) => {
   res.render('add-vehicle');
 });
 
-// Starting Server on PORT 3000
-app.listen(10000, () => {
-  console.log('Server running on http://localhost:10000');
+// Start Server
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+  console.log(`We Are Now Live`);
 });

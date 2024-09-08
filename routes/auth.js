@@ -1,4 +1,3 @@
-// Packages
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -11,7 +10,7 @@ const {
   editProfile,
   updateProfile
 } = require('../controllers/profileController');
-const { register, login, logout, verifyOtp, resendOtp} = require('../controllers/authController');
+const { register, login, showLoginPage, logout, verifyOtp, resendOtp } = require('../controllers/authController');
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
@@ -30,9 +29,8 @@ router.get('/', (req, res) => res.render('index'));
 router.get('/register', (req, res) => res.render('register'));
 router.post('/register', register);
 router.post('/otp', verifyOtp);
-// Resend OTP route
 router.post('/resend-otp', resendOtp);
-router.get('/login', (req, res) => res.render('login'));
+router.get('/login', showLoginPage);
 router.post('/login', login);
 router.get('/logout', logout);
 

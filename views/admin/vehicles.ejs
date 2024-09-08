@@ -13,6 +13,24 @@
         .centered {
             text-align: center;
         }
+        .description-text {
+            display: inline;
+        }
+        .description-text.truncated {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .description-text.expanded {
+            display: block;
+        }
+        .read-more-link {
+            cursor: pointer;
+            color: #007bff;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -67,7 +85,7 @@
                         <th>Year</th>
                         <th>Price per Day</th>
                         <th>Capacity</th>
-                        <th>Description</th>
+                        <th style="width: 35%;">Description</th>
                         <th>Availability</th>
                         <th>Action</th>
                     </tr>
@@ -81,7 +99,12 @@
                         <td><%= vehicle.year %></td>
                         <td><%= vehicle.pricePerDay %></td>
                         <td><%= vehicle.capacity %></td>
-                        <td><%= vehicle.description %></td>
+                        <td>
+                            <div class="description-text truncated" id="desc-<%= vehicle._id %>">
+                                <%= vehicle.description %>
+                            </div>
+                            <a class="read-more-link" id="read-more-<%= vehicle._id %>">Read more</a>
+                        </td>
                         <td><%= vehicle.availability ? 'Available' : 'Not Available' %></td>
                         <td>
                             <a href="/admin/edit-vehicle/<%= vehicle._id %>" class="btn btn-warning btn-sm">Edit</a>
@@ -118,6 +141,26 @@
                 } else {
                     row.style.display = 'none';
                 }
+            });
+        });
+
+        // Add Read More functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.read-more-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    const descId = this.id.replace('read-more-', '');
+                    const descElement = document.getElementById('desc-' + descId);
+
+                    if (descElement.classList.contains('truncated')) {
+                        descElement.classList.remove('truncated');
+                        descElement.classList.add('expanded');
+                        this.textContent = 'Read less';
+                    } else {
+                        descElement.classList.remove('expanded');
+                        descElement.classList.add('truncated');
+                        this.textContent = 'Read more';
+                    }
+                });
             });
         });
     </script>

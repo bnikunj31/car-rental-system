@@ -1,144 +1,253 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Register</title>
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <!-- Font Awesome for Eye Icon -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
     <style>
+      body {
+        background-image: linear-gradient(
+            rgba(0, 0, 0, 0.5),
+            rgba(0, 0, 0, 0.5)
+          ),
+          url("images/cars1.webp");
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        height: 100vh;
+        padding-top: 90px;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .register-container {
+        width: 100%;
+        max-width: 500px;
+        margin: auto;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.062);
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        border: 3px solid;
+        border-image: linear-gradient(
+            90deg,
+            red,
+            orange,
+            yellow,
+            green,
+            blue,
+            indigo,
+            violet
+          )
+          1;
+        animation: slideIn 1s ease-out, rainbowBorder 5s linear infinite;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      @keyframes rainbowBorder {
+        0% {
+          border-image-source: linear-gradient(
+            90deg,
+            red,
+            orange,
+            yellow,
+            green,
+            blue,
+            indigo,
+            violet
+          );
+        }
+        100% {
+          border-image-source: linear-gradient(
+            450deg,
+            red,
+            orange,
+            yellow,
+            green,
+            blue,
+            indigo,
+            violet
+          );
+        }
+      }
+
+      .register-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateY(-100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .register-container h2 {
+        color: #fff;
+      }
+
+      .register-container label {
+        color: #fff;
+      }
+
+      .register-container .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .register-container .btn-primary:hover {
+        background-color: #0056b3;
+        box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+      }
+
+      .register-container .btn-primary:active {
+        transform: scale(0.98);
+      }
+
+      @media (max-width: 768px) {
         body {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/cars1.webp');
-            background-position: center;
-            background-size: cover;
-            background-repeat: no-repeat;
-            height: 100vh;
-            padding-top: 90px;
-            font-family: 'Poppins', sans-serif;
+          padding-top: 60px;
         }
 
         .register-container {
-            width: 100%;
-            max-width: 500px;
-            margin: auto;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.062);
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            border: 3px solid;
-            border-image: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet) 1;
-            animation: slideIn 1s ease-out, rainbowBorder 5s linear infinite;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        @keyframes rainbowBorder {
-            0% {
-                border-image-source: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
-            }
-            100% {
-                border-image-source: linear-gradient(450deg, red, orange, yellow, green, blue, indigo, violet);
-            }
-        }
-
-        .register-container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateY(-100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+          width: 90%;
+          padding: 15px;
         }
 
         .register-container h2 {
-            color: #fff;
+          font-size: 1.5rem;
         }
 
-        .register-container label {
-            color: #fff;
+        .register-container .form-control {
+          font-size: 0.9rem;
         }
 
         .register-container .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+          font-size: 0.9rem;
+          padding: 10px;
         }
+      }
 
-        .register-container .btn-primary:hover {
-            background-color: #0056b3;
-            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
-        }
+      .form-group {
+        position: relative;
+      }
 
-        .register-container .btn-primary:active {
-            transform: scale(0.98);
-        }
+      .eye-icon {
+        position: absolute;
+        right: 15px;
+        top: 70%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6c757d;
+        z-index: 1;
+      }
 
-        @media (max-width: 768px) {
-            body {
-                padding-top: 60px;
-            }
+      /* When hovering over the eye icon, change the password input type */
+      .form-group:hover #password {
+        /* Show password when hovering over the eye icon */
+        type: text;
+      }
 
-            .register-container {
-                width: 90%;
-                padding: 15px;
-            }
-
-            .register-container h2 {
-                font-size: 1.5rem;
-            }
-
-            .register-container .form-control {
-                font-size: 0.9rem;
-            }
-
-            .register-container .btn-primary {
-                font-size: 0.9rem;
-                padding: 10px;
-            }
-        }
+      /* Ensure the eye icon is positioned properly */
+      .form-group:hover .eye-icon {
+        display: block;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="register-container">
-        <h2 class="text-center">Register</h2>
-        <!-- Error Handling -->
-        <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    <% errors.forEach(function(error) { %>
-                        <li><%= error.msg %></li>
-                    <% }) %>
-                </ul>
-            </div>
-        <% } %>
-        <form action="/register" method="post">
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" class="form-control" id="name" name="name" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" class="form-control" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="phoneNumber">Phone Number:</label>
-                <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
-            <button type="submit" class="btn btn-primary btn-block my-3">Register</button>
-            <hr>
-            <p class="text-center text-light">Already Registered? <a href="/login">Login</a></p>
-        </form>
+      <h2 class="text-center">Register</h2>
+      <!-- Error Handling -->
+      <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+      <div class="alert alert-danger">
+        <ul class="mb-0">
+          <% errors.forEach(function(error) { %>
+          <li><%= error.msg %></li>
+          <% }) %>
+        </ul>
+      </div>
+      <% } %>
+      <form action="/register" method="post">
+        <div class="form-group position-relative">
+          <label for="name">Name:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="name"
+            name="name"
+            required
+          />
+        </div>
+        <div class="form-group position-relative">
+          <label for="email">Email:</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            required
+          />
+        </div>
+        <div class="form-group position-relative">
+          <label for="phoneNumber">Phone Number:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="phoneNumber"
+            name="phoneNumber"
+            required
+          />
+        </div>
+        <div class="form-group position-relative">
+          <label for="password">Password:</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            required
+          />
+          <i class="fas fa-eye eye-icon" id="togglePassword"></i>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block my-3">
+          Register
+        </button>
+        <hr />
+        <p class="text-center text-light">
+          Already Registered? <a href="/login">Login</a>
+        </p>
+      </form>
     </div>
-</body>
+
+    <!-- JavaScript for Password Toggle -->
+    <script>
+      document
+        .getElementById("togglePassword")
+        .addEventListener("click", function () {
+          const passwordField = document.getElementById("password");
+          const type =
+            passwordField.getAttribute("type") === "password"
+              ? "text"
+              : "password";
+          passwordField.setAttribute("type", type);
+          this.classList.toggle("fa-eye-slash");
+        });
+    </script>
+  </body>
 </html>

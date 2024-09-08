@@ -25,12 +25,20 @@
                         <form action="/otp" method="POST">
                             <input type="hidden" name="email" value="<%= email %>">
                             <div class="mb-3">
-                                <label for="enteredOtp" class="form-label">Enter your OTP</label>
-                                <input type="text" name="enteredOtp" id="enteredOtp" class="form-control" placeholder="Enter your OTP" required>
+                                <label for="enteredOtpEmail" class="form-label">Enter your Email OTP</label>
+                                <input type="text" name="enteredOtpEmail" id="enteredOtpEmail" class="form-control" placeholder="Enter your Email OTP" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="enteredOtpPhone" class="form-label">Enter your Phone OTP</label>
+                                <input type="text" name="enteredOtpPhone" id="enteredOtpPhone" class="form-control" placeholder="Enter your Phone OTP" required>
                             </div>
                             <div class="d-grid mb-3">
                                 <button type="submit" class="btn btn-primary">Verify OTP</button>
                             </div>
+                        </form>
+                        <form action="/resend-otp" method="POST">
+                            <input type="hidden" name="email" value="<%= email %>">
+                            <button type="submit" class="btn btn-secondary">Resend OTP</button>
                         </form>
                     </div>
                 </div>
