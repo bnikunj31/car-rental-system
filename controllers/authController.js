@@ -58,7 +58,7 @@ const register = async (req, res) => {
 
     const emailOtp = generateOTP();
     const phoneOtp = generateOTP();
-    const otpExpires = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
+    const otpExpires = Date.now() + 10 * 60 * 1000;
 
     // Store OTPs in session
     req.session.emailOtp = emailOtp;
@@ -84,20 +84,26 @@ const register = async (req, res) => {
       }
     });
     // Send OTP via SMS using Twilio
-    client.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID)
-      .verifications
-      .create({ to: `+91${phoneNumber}`, channel: 'sms' })
-      .then(verification => {
-        if (!res.headersSent) {
-          res.render('otp', { email, phonenumber:phoneNumber, message: 'Please enter the OTPs sent to your email and phone.' });
-        }
-      })
-      .catch(err => {
-        console.error('Error sending SMS:', err.message);
-        if (!res.headersSent) {
-          return res.status(500).json({ error: 'Error sending OTP via SMS' });
-        }
-      });
+// Send OTP via SMS using Twilio
+client.messages
+  .create({
+    from: process.env.TWILIO_PHONE_NUMBER,
+    to: `+91${phoneNumber}`,
+    body: `Your phone OTP code is ${phoneOtp}. It will expire in 10 minutes.`
+  })
+  .then(message => {
+    console.log('SMS sent successfully:', message.sid);
+    if (!res.headersSent) {
+      res.render('otp', { email, phoneNumber, message: 'Please enter the OTPs sent to your email and phone.' });
+    }
+  })
+  .catch(err => {
+    console.error('Error sending SMS:', err.message);
+    if (!res.headersSent) {
+      return res.status(500).json({ error: 'Error sending OTP via SMS' });
+    }
+  });
+
 
   } catch (error) {
     if (!res.headersSent) {
