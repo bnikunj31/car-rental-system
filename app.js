@@ -26,8 +26,8 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'yourSecretKey',
   resave: false,
   saveUninitialized: true,
-  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }), // Use MongoDB for session storage
-  cookie: { secure: process.env.NODE_ENV === 'production' } // Set to true if using HTTPS
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+  cookie: { secure: true }
 }));
 
 // View Engine
