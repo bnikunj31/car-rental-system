@@ -115,7 +115,7 @@ client.messages
 // Controller for OTP Verification
 const verifyOtp = async (req, res) => {
   const { email, emailOtp, phoneOtp } = req.body;
-  req.send(req.session.registrationData.phoneNumber)
+  req.send(req.session.registrationData)
   phoneNumber = req.session.registrationData.phoneNumber;
 
   try {
