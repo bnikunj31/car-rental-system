@@ -67,6 +67,8 @@ const register = async (req, res) => {
     req.session.phoneOtpExpires = otpExpires;
     req.session.registrationData = { name, email, phoneNumber, password }; // Store registration data temporarily
 
+    res.cookie('phoneNumber', phoneNumber, { httpOnly: true, secure: true });
+
     // Send OTP via email
     const mailOptions = {
       from: process.env.EMAIL_USER,
