@@ -65,9 +65,12 @@ const register = async (req, res) => {
     req.session.phoneOtp = phoneOtp;
     req.session.emailOtpExpires = otpExpires;
     req.session.phoneOtpExpires = otpExpires;
-    req.session.registrationData = { name, email, phoneNumber, password }; // Store registration data temporarily
 
-    res.cookie('phoneNumber', phoneNumber, { httpOnly: true, secure: true });
+    // Store registration data in cookies
+    res.cookie('name', name, { httpOnly: true, secure: true, sameSite: 'Strict' });
+    res.cookie('email', email, { httpOnly: true, secure: true, sameSite: 'Strict' });
+    res.cookie('phoneNumber', phoneNumber, { httpOnly: true, secure: true, sameSite: 'Strict' });
+    res.cookie('password', password, { httpOnly: true, secure: true, sameSite: 'Strict' });
 
     // Send OTP via email
     const mailOptions = {
@@ -117,50 +120,51 @@ client.messages
 // Controller for OTP Verification
 const verifyOtp = async (req, res) => {
   const { email, emailOtp, phoneOtp } = req.body;
-  phoneNumber = req.session.registrationData.phoneNumber;
-
+  
   try {
-    // Check if registration data exists in session
-    const sessionData = req.session.registrationData;
-    if (!sessionData) {
-      return res.status(400).render('otp', { email, message: 'Session expired. Please register again.' });
-    }
+    // Get registration data from cookies
+    const name = req.cookies.name;
+    const phoneNumber = req.cookies.phoneNumber;
+    const password = req.cookies.password;
 
     // Check if OTPs match and are valid
     const currentTime = Date.now();
     if (
-      sessionData.emailOtp !== emailOtp ||
-      sessionData.phoneOtp !== phoneOtp ||
-      sessionData.emailOtpExpires < currentTime ||
-      sessionData.phoneOtpExpires < currentTime
+      req.session.emailOtp !== emailOtp ||
+      req.session.phoneOtp !== phoneOtp ||
+      req.session.emailOtpExpires < currentTime ||
+      req.session.phoneOtpExpires < currentTime
     ) {
       return res.status(400).render('otp', { email, message: 'Invalid OTPs. Please try again.' });
     }
 
     // Create and save the new user
-    const { name, password } = sessionData;
     const newUser = new User({
       name,
       email,
-      phoneNumber,  // Ensure this is included
+      phoneNumber,
       password,
       isVerified: true // Mark the user as verified
     });
 
     await newUser.save();
 
-    // Clear session data
-    req.session.registrationData = null;
+    // Clear session data and cookies after successful registration
     req.session.emailOtp = null;
     req.session.phoneOtp = null;
+
+    res.clearCookie('name');
+    res.clearCookie('email');
+    res.clearCookie('phoneNumber');
+    res.clearCookie('password');
 
     // Redirect to login page
     res.redirect('/login');
   } catch (error) {
-    // console.error('Error verifying OTP:', error);
     res.status(400).render('otp', { email, message: 'Error verifying OTP. Please try again.' });
   }
 };
+
 
 
 const showLoginPage = (req, res) => {
