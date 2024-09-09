@@ -90,23 +90,15 @@ const register = async (req, res) => {
     });
     // Send OTP via SMS using Twilio
 // Send OTP via SMS using Twilio
-client.messages
-  .create({
-    from: process.env.TWILIO_PHONE_NUMBER,
-    to: `+91${phoneNumber}`,
-    body: `Your phone OTP code is ${phoneOtp}. It will expire in 10 minutes.`
-  })
-  .then(message => {
-    console.log('SMS sent successfully:', message.sid);
-    if (!res.headersSent) {
-      res.render('otp', { email, phoneNumber, message: 'Please enter the OTPs sent to your email and phone.' });
-    }
+client.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID)
+  .verifications
+  .create({ to: `+91${phoneNumber}`, channel: 'sms' })
+  .then(verification => {
+    res.render('otp', { email, phoneNumber, message: 'Please enter the OTPs sent to your email and phone.' });
   })
   .catch(err => {
     console.error('Error sending SMS:', err.message);
-    if (!res.headersSent) {
-      return res.status(500).json({ error: 'Error sending OTP via SMS' });
-    }
+    res.status(500).json({ success: false, message: 'Error sending OTP via SMS.' });
   });
 
 
@@ -122,6 +114,7 @@ const verifyOtp = async (req, res) => {
   const { email, emailOtp, phoneOtp } = req.body;
   
   try {
+    console.log('Session Data:', req.session);
     // Get registration data from cookies
     const name = req.cookies.name;
     const phoneNumber = req.cookies.phoneNumber;
@@ -168,52 +161,86 @@ const verifyOtp = async (req, res) => {
 
 
 const showLoginPage = (req, res) => {
-  req.session.captcha = generateCaptcha(); // Generate new CAPTCHA on page load
-  res.render('login', { captcha: req.session.captcha }); // Pass CAPTCHA to the view
+  const captcha = generateCaptcha(); // Generate new CAPTCHA
+  res.cookie('captcha', captcha, { 
+    httpOnly: true, 
+    secure: true, 
+    sameSite: 'Strict',
+    maxAge: 2 * 60 * 60 * 1000 // Set cookie expiry to 2 hours
+  });
+  res.render('login', { captcha }); // Pass CAPTCHA to the view if needed
 };
 
-// Controller for Login
+
 const login = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).render('login', { errors: errors.array(), captcha: req.session.captcha });
+    return res.status(400).render('login', { 
+      errors: errors.array(), 
+      captcha: req.cookies.captcha // Retrieve CAPTCHA from cookies
+    });
   }
 
   const { email, password, captchaInput } = req.body;
 
   try {
     // Verify CAPTCHA
-    if (captchaInput !== req.session.captcha) {
-      // CAPTCHA is incorrect, regenerate and show the new CAPTCHA
-      req.session.captcha = generateCaptcha();
+    if (captchaInput !== req.cookies.captcha) {
+      // CAPTCHA is incorrect, regenerate and set a new CAPTCHA cookie
+      const newCaptcha = generateCaptcha();
+      res.cookie('captcha', newCaptcha, { 
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === 'production', 
+        sameSite: 'Strict',
+        maxAge: 2 * 60 * 60 * 1000 // Set cookie expiry to 2 hours
+      });
       return res.status(400).render('login', {
         errors: [{ msg: 'Invalid CAPTCHA' }],
-        captcha: req.session.captcha // Pass the new CAPTCHA to the frontend
+        captcha: newCaptcha // Pass the new CAPTCHA to the frontend
       });
     }
 
     const user = await User.findOne({ email });
     if (!user || !(await user.matchPassword(password))) {
-      req.session.captcha = generateCaptcha(); // Regenerate CAPTCHA
+      // Regenerate CAPTCHA if credentials are invalid
+      const newCaptcha = generateCaptcha();
+      res.cookie('captcha', newCaptcha, { 
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === 'production', 
+        sameSite: 'Strict',
+        maxAge: 2 * 60 * 60 * 1000 // Set cookie expiry to 2 hours
+      });
       return res.status(400).render('login', {
         errors: [{ msg: 'Invalid credentials' }],
-        captcha: req.session.captcha // Pass new CAPTCHA to the frontend
+        captcha: newCaptcha // Pass the new CAPTCHA to the frontend
       });
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '10y' });
 
-    res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict' });
+    res.cookie('token', token, { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production', 
+      sameSite: 'Strict' 
+    });
     await Record.logActivity(user._id, `${user.name} Login to the Application`);
     res.redirect(`/vehicles?token=${token}`);
   } catch (error) {
-    req.session.captcha = generateCaptcha(); // Regenerate CAPTCHA
+    // Regenerate CAPTCHA if an error occurs
+    const newCaptcha = generateCaptcha();
+    res.cookie('captcha', newCaptcha, { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production', 
+      sameSite: 'Strict',
+      maxAge: 2 * 60 * 60 * 1000 // Set cookie expiry to 2 hours
+    });
     res.status(400).render('login', {
       errors: [{ msg: 'Error logging in user' }],
-      captcha: req.session.captcha // Pass new CAPTCHA to the frontend
+      captcha: newCaptcha // Pass the new CAPTCHA to the frontend
     });
   }
 };
+
 
 // Controller for Logout
 const logout = (req, res) => {

@@ -27,7 +27,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
-  cookie: { secure: true }
+  cookie: { secure: true,  maxAge: 2 * 60 * 60 * 1000 }
 }));
 
 // View Engine
