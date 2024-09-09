@@ -37,6 +37,16 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+function sendOtp(phoneNumber, otp) {
+  client.messages.create({
+    body: `Your OTP code is ${otp}`,
+    from: process.env.TWILIO_PHONE_NUMBER, // Use your Twilio phone number here
+    to: phoneNumber
+  })
+  .then(message => console.log(`OTP sent successfully! Message SID: ${message.sid}`))
+  .catch(error => console.error('Error sending OTP:', error));
+}
+
 // Temporary user store (consider using a more persistent solution)
 const tempUserStore = {};
 
@@ -82,25 +92,17 @@ const register = async (req, res) => {
 
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
-        // console.error('Error sending OTP via email:', error);
         if (!res.headersSent) {
           return res.status(500).json({ error: 'Error sending OTP via email' });
         }
       }
     });
-    // Send OTP via SMS using Twilio
-// Send OTP via SMS using Twilio
-client.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID)
-  .verifications
-  .create({ to: `+91${phoneNumber}`, channel: 'sms' })
-  .then(verification => {
-    res.render('otp', { email, phoneNumber, message: 'Please enter the OTPs sent to your email and phone.' });
-  })
-  .catch(err => {
-    console.error('Error sending SMS:', err.message);
-    res.status(500).json({ success: false, message: 'Error sending OTP via SMS.' });
-  });
 
+    // Send OTP via SMS using Twilio
+    sendOtp(`+91${phoneNumber}`, phoneOtp);
+
+    // Render OTP verification page
+    res.render('otp', { email, phoneNumber, message: 'Please enter the OTPs sent to your email and phone.' });
 
   } catch (error) {
     if (!res.headersSent) {
